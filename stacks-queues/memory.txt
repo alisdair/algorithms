@@ -1,0 +1,7 @@
+object = 16
+int = 4
+next = 8 (ref)
+prev = 8 (ref)
+subtotal = 36
+padding = 4
+total = 40

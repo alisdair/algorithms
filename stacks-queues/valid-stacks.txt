@@ -1,0 +1,39 @@
+1 0 2 4 5 7 6 3 8 9
+
+push push pop pop push pop push push pop push pop push push pop pop pop push pop push pop
+
+0 1 2 4 3 5 7 9 8 6
+
+push pop push pop push pop push push pop pop push pop push push pop push push pop pop pop
+
+0 3 5 7 4 9 8 6 2 1
+
+push pop push push push pop push push pop push push pop (stuck, need 4 but have 6)
+
+0 2 3 1 7 9 6 8 5 4
+
+push pop push push pop push pop pop push push push push pop push push pop (stuck, need 7 but have 8)
+
+4 3 2 1 0 5 6 7 8 9
+
+push push push push push pop pop pop pop pop push pop push pop push pop push pop pop
+
+3 7 6 5 9 4 8 2 1 0
+
+push push push push pop push push push push pop pop pop push push (nope)
+
+1 2 3 5 7 4 8 9 6 0
+
+push push pop push pop push pop push push pop push push pop (nope)
+
+0 2 1 3 5 7 6 4 8 9
+
+push pop push push pop pop push pop push push pop push push pop pop pop push pop push pop
+
+3 2 1 0 4 5 6 7 8 9
+
+push push push push pop pop pop pop push pop push pop push pop push pop push pop push pop
+
+1 2 8 7 9 6 5 4 3 0
+
+push push pop push pop push push push push push push pop pop push pop pop pop pop pop pop
