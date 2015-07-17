@@ -11,8 +11,13 @@ public class Board
       throw new java.lang.NullPointerException();
     }
 
-    this.blocks = blocks;
     N = blocks.length;
+
+    this.blocks = new int[N][];
+    
+    for (int i = 0; i < N; i++) {
+      this.blocks[i] = blocks[i].clone();
+    }
   }
 
   // board dimension N
@@ -28,9 +33,9 @@ public class Board
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        int block = blocks[i][j];
+        int block = blocks[i][j] - 1;
 
-        if (block == 0) {
+        if (block < 0) {
           continue;
         }
 
@@ -50,9 +55,9 @@ public class Board
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        int block = blocks[i][j];
+        int block = blocks[i][j] - 1;
 
-        if (block == 0) {
+        if (block < 0) {
           continue;
         }
 
