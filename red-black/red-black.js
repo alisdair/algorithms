@@ -49,7 +49,6 @@ Tree.prototype.put = function(key, value) {
   }
 
   function flipColors(h) {
-    console.log("FLIP");
     if (isRed(h)) { throw "Can't flip node which is red"; }
     if (!isRed(h.left)) { throw "Can't flip unless left node is red"; }
     if (!isRed(h.right)) { throw "Can't flip unless right node is red"; }
@@ -169,6 +168,30 @@ Tree.prototype.remove = function(key) {
   this.root = remove(this.root, key);
 }
 
+Tree.prototype.range = function(lo, hi) {
+  function range(node, results, lo, hi) {
+    if (node == null) {
+      return;
+    }
+
+    if (lo < node.key) {
+      range(node.left, results, lo, hi);
+    }
+
+    if (lo <= node.key && hi >= node.key) {
+      results.push(node);
+    }
+
+    if (hi > node.key) {
+      range(node.right, results, lo, hi);
+    }
+  }
+
+  var results = [];
+  range(this.root, results, lo, hi);
+  return results;
+}
+
 function findKeys(tree) {
   var keys = [];
   tree.traverse(function(node) { keys.push(node.key); });
@@ -195,13 +218,13 @@ function buildTree(nodes) {
   return tree;
 }
 
-var nodes = process.argv.slice(2);
-if (nodes.length === 0) {
-  nodes = 'S E A R C H X M P L'.split(' '); // => M E R C L P X A H S
-}
+// var nodes = process.argv.slice(2);
+// if (nodes.length === 0) {
+//   nodes = 'S E A R C H X M P L'.split(' '); // => M E R C L P X A H S
+// }
 
-var tree = buildTree(nodes);
-console.log(findKeys(tree).join(' '))
+// var tree = buildTree(nodes);
+// console.log(findKeys(tree).join(' '))
 
 module.exports = {
   Tree: Tree,
