@@ -249,7 +249,6 @@ public class KdTree {
     // Is this node nearer than the current nearest? If so, update
     if (d2p < d2n) {
       nearest = x.p;
-      d2n = d2p;
     }
 
     // No children? Return current nearest
@@ -265,11 +264,6 @@ public class KdTree {
     // Only right/top child? Recurse to it
     if (x.lb == null) {
       return findNearest(x.rt, query, nearest);
-    }
-
-    // Not both children? Must have one child and not closer, return
-    if (x.lb == null || x.rt == null) {
-      return nearest;
     }
 
     // Try both children, the one containing the query point first
