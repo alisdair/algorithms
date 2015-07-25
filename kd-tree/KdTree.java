@@ -189,7 +189,11 @@ public class KdTree {
     }
 
     Stack<Point2D> inside = new Stack<Point2D>();
-    range(root, rect, inside);
+
+    if (root != null) {
+      range(root, rect, inside);
+    }
+
     return inside;
   }
 
