@@ -37,12 +37,19 @@ public class KdTree {
       throw new java.lang.NullPointerException();
     }
 
-    RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
-    root = insert(root, p, true, rect);
+    root = insert(root, p, true, null, 0);
   }
 
-  private Node insert(Node x, Point2D p, boolean leftRight, RectHV rect) {
+  private Node insert(Node x, Point2D p, boolean leftRight, Node parent, int c) {
     if (x == null) {
+      RectHV rect;
+
+      if (parent == null) {
+        rect = new RectHV(0.0, 0.0, 1.0, 1.0);
+      } else {
+        rect = subdivide(parent.rect, parent.p, c, !leftRight);
+      }
+
       size++;
       return new Node(p, rect);
     }
@@ -56,14 +63,11 @@ public class KdTree {
     }
 
     int cmp = comparator.compare(p, x.p);
-    RectHV nextRect = subdivide(rect, x.p, cmp, leftRight);
 
     if (cmp < 0) {
-      x.lb = insert(x.lb, p, !leftRight, nextRect);
-    } else if (cmp > 0) {
-      x.rt = insert(x.rt, p, !leftRight, nextRect);
-    } else if (!x.p.equals(p)) {
-      x.rt = insert(x.rt, p, !leftRight, nextRect);
+      x.lb = insert(x.lb, p, !leftRight, x, cmp);
+    } else if (cmp > 0 || !x.p.equals(p)) {
+      x.rt = insert(x.rt, p, !leftRight, x, cmp);
     }
 
     return x;
@@ -289,11 +293,17 @@ public class KdTree {
   // unit testing of the methods (optional)
   public static void main(String[] args)
   {
+    String filename = args[0];
+    In in = new In(filename);
+
     KdTree kdtree = new KdTree();
-    kdtree.insert(new Point2D(0.0, 0.0));
-    kdtree.insert(new Point2D(0.0, 0.0));
-    kdtree.insert(new Point2D(0.0, 0.0));
-    kdtree.insert(new Point2D(0.0, 0.0));
-    StdOut.println("Tree size: " + kdtree.size());
+    while (!in.isEmpty()) {
+      double x = in.readDouble();
+      double y = in.readDouble();
+      Point2D p = new Point2D(x, y);
+      kdtree.insert(p);
+    }
+
+    kdtree.draw();
   }
 }
