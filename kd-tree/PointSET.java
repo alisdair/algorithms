@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 public class PointSET {
   private SET<Point2D> points;
 
@@ -65,6 +67,22 @@ public class PointSET {
     return inside;
   }
 
+  private class DistanceToOrder implements Comparator<Point2D> {
+    Point2D point;
+
+    public DistanceToOrder(Point2D point) {
+      this.point = point;
+    }
+
+    public int compare(Point2D p, Point2D q) {
+      double dist1 = point.distanceSquaredTo(p);
+      double dist2 = point.distanceSquaredTo(q);
+      if      (dist1 < dist2) return -1;
+      else if (dist1 > dist2) return +1;
+      else                    return  0;
+    }
+  }
+
   // a nearest neighbor in the set to point p; null if the set is empty 
   public Point2D nearest(Point2D p)
   {
@@ -72,7 +90,8 @@ public class PointSET {
       throw new java.lang.NullPointerException();
     }
 
-    MinPQ<Point2D> queue = new MinPQ<Point2D>(size(), p.DISTANCE_TO_ORDER);
+    Comparator<Point2D> distanceComparator = new DistanceToOrder(p);
+    MinPQ<Point2D> queue = new MinPQ<Point2D>(size(), distanceComparator);
 
     for (Point2D point : points) {
       queue.insert(point);
