@@ -150,8 +150,8 @@ public class KdTree {
   }
 
   private static class NodeSplit {
-    Node node;
-    boolean leftRight;
+    private Node node;
+    private boolean leftRight;
 
     private NodeSplit(Node n, boolean lr) {
       node = n;

@@ -68,7 +68,7 @@ public class PointSET {
   }
 
   private class DistanceToOrder implements Comparator<Point2D> {
-    Point2D point;
+    private Point2D point;
 
     public DistanceToOrder(Point2D point) {
       this.point = point;
@@ -88,6 +88,10 @@ public class PointSET {
   {
     if (p == null) {
       throw new java.lang.NullPointerException();
+    }
+
+    if (size() == 0) {
+      return null;
     }
 
     Comparator<Point2D> distanceComparator = new DistanceToOrder(p);
