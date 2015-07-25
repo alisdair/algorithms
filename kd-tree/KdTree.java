@@ -14,41 +14,20 @@ public class KdTree {
   }
 
   private Node root;
+  private int size;
 
   public KdTree()
   {
+    size = 0;
   }
 
   public boolean isEmpty()
   {
-    return root == null;
+    return size == 0;
   }
 
   public int size()
   {
-    if (root == null) {
-      return 0;
-    }
-
-    Stack<Node> nodes = new Stack<Node>();
-    int size = 0;
-
-    nodes.push(root);
-
-    while (!nodes.isEmpty()) {
-      Node node = nodes.pop();
-
-      size += 1;
-
-      if (node.lb != null) {
-        nodes.push(node.lb);
-      }
-
-      if (node.rt != null) {
-        nodes.push(node.rt);
-      }
-    }
-
     return size;
   }
 
@@ -64,6 +43,7 @@ public class KdTree {
 
   private Node insert(Node x, Point2D p, boolean leftRight, RectHV rect) {
     if (x == null) {
+      size++;
       return new Node(p, rect);
     }
 
@@ -80,7 +60,9 @@ public class KdTree {
 
     if (cmp < 0) {
       x.lb = insert(x.lb, p, !leftRight, nextRect);
-    } else if (cmp >= 0) {
+    } else if (cmp > 0) {
+      x.rt = insert(x.rt, p, !leftRight, nextRect);
+    } else if (!x.p.equals(p)) {
       x.rt = insert(x.rt, p, !leftRight, nextRect);
     }
 
@@ -303,18 +285,11 @@ public class KdTree {
   // unit testing of the methods (optional)
   public static void main(String[] args)
   {
-    String filename = args[0];
-    In in = new In(filename);
-
-    // initialize the two data structures with point from standard input
     KdTree kdtree = new KdTree();
-    while (!in.isEmpty()) {
-      double x = in.readDouble();
-      double y = in.readDouble();
-      Point2D p = new Point2D(x, y);
-      kdtree.insert(p);
-    }
-
-    kdtree.draw();
+    kdtree.insert(new Point2D(0.0, 0.0));
+    kdtree.insert(new Point2D(0.0, 0.0));
+    kdtree.insert(new Point2D(0.0, 0.0));
+    kdtree.insert(new Point2D(0.0, 0.0));
+    StdOut.println("Tree size: " + kdtree.size());
   }
 }
