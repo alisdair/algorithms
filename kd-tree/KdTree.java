@@ -207,35 +207,23 @@ public class KdTree {
     }
 
     Stack<Point2D> inside = new Stack<Point2D>();
-
-    if (root == null) {
-      return inside;
-    }
-
-    Stack<Node> nodes = new Stack<Node>();
-    nodes.push(root);
-
-    while (!nodes.isEmpty()) {
-      Node node = nodes.pop();
-
-      if (!node.rect.intersects(rect)) {
-        continue;
-      }
-
-      if (rect.contains(node.p)) {
-        inside.push(node.p);
-      }
-
-      if (node.lb != null) {
-        nodes.push(node.lb);
-      }
-
-      if (node.rt != null) {
-        nodes.push(node.rt);
-      }
-    }
-
+    range(root, rect, inside);
     return inside;
+  }
+
+  private void range(Node x, RectHV rect, Stack<Point2D> inside)
+  {
+    if (rect.contains(x.p)) {
+      inside.push(x.p);
+    }
+
+    if (x.lb != null && x.lb.rect.intersects(rect)) {
+      range(x.lb, rect, inside);
+    }
+
+    if (x.rt != null && x.rt.rect.intersects(rect)) {
+      range(x.rt, rect, inside);
+    }
   }
 
   // a nearest neighbor in the set to point p; null if the set is empty 
@@ -249,61 +237,63 @@ public class KdTree {
       return null;
     }
 
-    Stack<NodeSplit> nodes = new Stack<NodeSplit>();
-    Point2D nearest = root.p;
-    double nearestDistanceSquared = nearest.distanceSquaredTo(p);
-    nodes.push(new NodeSplit(root, true));
+    return findNearest(root, true, p, root.p);
+  }
 
-    while (!nodes.isEmpty()) {
-      NodeSplit ns = nodes.pop();
-      Node node = ns.node;
+  private Point2D findNearest(Node x, boolean leftRight, Point2D query, Point2D nearest)
+  {
+    double d2n = query.distanceSquaredTo(nearest);
+    double d2x = query.distanceSquaredTo(x.p);
 
-      double distanceSquared = node.p.distanceSquaredTo(p);
-      if (distanceSquared < nearestDistanceSquared) {
-        nearest = node.p;
-        nearestDistanceSquared = distanceSquared;
+    // Is this node nearer than the current nearest? If so, update
+    if (d2x < d2n) {
+      nearest = x.p;
+      d2n = d2x;
+    }
+
+    // No children? Return current nearest
+    if (x.lb == null && x.rt == null) {
+      return nearest;
+    }
+
+    // Only left/bottom child, and it might be closer? Recurse to it
+    if (x.rt == null && x.lb.rect.distanceSquaredTo(query) < d2n) {
+      return findNearest(x.lb, !leftRight, query, nearest);
+    }
+
+    // Only right/top child, and it might be closer? Recurse to it
+    if (x.lb == null && x.rt.rect.distanceSquaredTo(query) < d2n) {
+      return findNearest(x.rt, !leftRight, query, nearest);
+    }
+
+    // Not both children? Must have one child and not closer, return
+    if (x.lb == null || x.rt == null) {
+      return nearest;
+    }
+
+    // Both children exist, so precompute the distance to their rects
+    double d2lb = x.lb.rect.distanceSquaredTo(query);
+    double d2rt = x.rt.rect.distanceSquaredTo(query);
+
+    // If this is a left-right split, check x co-ordinates to find the
+    // sub-tree on the same side as the query
+    if ((leftRight && x.p.x() < query.x()) || (!leftRight && x.p.y() < query.y())) {
+      if (d2lb < d2n) {
+        nearest = findNearest(x.lb, !leftRight, query, nearest);
+        d2n = query.distanceSquaredTo(nearest);
       }
 
-      double rectDistanceSquared = node.rect.distanceSquaredTo(p);
-      if (rectDistanceSquared >= nearestDistanceSquared) {
-        continue;
+      if (d2rt < d2n) {
+        nearest = findNearest(x.rt, !leftRight, query, nearest);
+      }
+    } else {
+      if (d2rt < d2n) {
+        nearest = findNearest(x.rt, !leftRight, query, nearest);
+        d2n = query.distanceSquaredTo(nearest);
       }
 
-      NodeSplit nslb = new NodeSplit(node.lb, !ns.leftRight);
-      NodeSplit nsrt = new NodeSplit(node.rt, !ns.leftRight);
-
-      if (node.lb == null && node.rt == null) {
-        continue;
-      }
-
-      if (node.rt == null) {
-        nodes.push(nslb);
-        continue;
-      }
-
-      if (node.lb == null) {
-        nodes.push(nsrt);
-        continue;
-      }
-
-      // Compare point to each child so that we can insert the closest
-      // one first
-      Comparator<Point2D> comparator;
-
-      if (ns.leftRight) {
-        comparator = Point2D.X_ORDER;
-      } else {
-        comparator = Point2D.Y_ORDER;
-      }
-
-      int cmp = comparator.compare(p, node.p);
-
-      if (cmp < 0) {
-        nodes.push(nslb);
-        nodes.push(nsrt);
-      } else {
-        nodes.push(nsrt);
-        nodes.push(nslb);
+      if (d2lb < d2n) {
+        nearest = findNearest(x.lb, !leftRight, query, nearest);
       }
     }
 
