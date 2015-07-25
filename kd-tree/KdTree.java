@@ -110,7 +110,7 @@ public class KdTree {
       return false;
     }
 
-    if (x.p == p) {
+    if (x.p.equals(p)) {
       return true;
     }
 
