@@ -153,7 +153,6 @@ public class KdTree {
     }
 
     Stack<NodeSplit> nodes = new Stack<NodeSplit>();
-    int size = 0;
 
     nodes.push(new NodeSplit(root, true));
 
