@@ -226,18 +226,30 @@ public class KdTree {
       return null;
     }
 
-    return findNearest(root, true, p, root.p);
+    return findNearest(root, p, root.p);
   }
 
-  private Point2D findNearest(Node x, boolean leftRight, Point2D query, Point2D nearest)
+  private Point2D findNearest(Node x, Point2D query, Point2D nearest)
   {
+    if (x == null) {
+      return nearest;
+    }
+
     double d2n = query.distanceSquaredTo(nearest);
-    double d2x = query.distanceSquaredTo(x.p);
+    double d2r = x.rect.distanceSquaredTo(query);
+
+    // Is the nearest point closer than this node's rectangle? If so, this
+    // node can't contain anything nearer, so return
+    if (d2n < d2r) {
+      return nearest;
+    }
+
+    double d2p = query.distanceSquaredTo(x.p);
 
     // Is this node nearer than the current nearest? If so, update
-    if (d2x < d2n) {
+    if (d2p < d2n) {
       nearest = x.p;
-      d2n = d2x;
+      d2n = d2p;
     }
 
     // No children? Return current nearest
@@ -245,14 +257,14 @@ public class KdTree {
       return nearest;
     }
 
-    // Only left/bottom child, and it might be closer? Recurse to it
-    if (x.rt == null && x.lb.rect.distanceSquaredTo(query) < d2n) {
-      return findNearest(x.lb, !leftRight, query, nearest);
+    // Only left/bottom child? Recurse to it
+    if (x.rt == null) {
+      return findNearest(x.lb, query, nearest);
     }
 
-    // Only right/top child, and it might be closer? Recurse to it
-    if (x.lb == null && x.rt.rect.distanceSquaredTo(query) < d2n) {
-      return findNearest(x.rt, !leftRight, query, nearest);
+    // Only right/top child? Recurse to it
+    if (x.lb == null) {
+      return findNearest(x.rt, query, nearest);
     }
 
     // Not both children? Must have one child and not closer, return
@@ -260,30 +272,13 @@ public class KdTree {
       return nearest;
     }
 
-    // Both children exist, so precompute the distance to their rects
-    double d2lb = x.lb.rect.distanceSquaredTo(query);
-    double d2rt = x.rt.rect.distanceSquaredTo(query);
-
-    // If this is a left-right split, check x co-ordinates to find the
-    // sub-tree on the same side as the query
-    if ((leftRight && x.p.x() < query.x()) || (!leftRight && x.p.y() < query.y())) {
-      if (d2lb < d2n) {
-        nearest = findNearest(x.lb, !leftRight, query, nearest);
-        d2n = query.distanceSquaredTo(nearest);
-      }
-
-      if (d2rt < d2n) {
-        nearest = findNearest(x.rt, !leftRight, query, nearest);
-      }
+    // Try both children, the one containing the query point first
+    if (x.lb.rect.contains(query)) {
+      nearest = findNearest(x.lb, query, nearest);
+      nearest = findNearest(x.rt, query, nearest);
     } else {
-      if (d2rt < d2n) {
-        nearest = findNearest(x.rt, !leftRight, query, nearest);
-        d2n = query.distanceSquaredTo(nearest);
-      }
-
-      if (d2lb < d2n) {
-        nearest = findNearest(x.lb, !leftRight, query, nearest);
-      }
+      nearest = findNearest(x.rt, query, nearest);
+      nearest = findNearest(x.lb, query, nearest);
     }
 
     return nearest;
